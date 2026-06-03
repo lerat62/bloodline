@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - BloodLine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bl-body">
+    <div class="bl-app">
+        <aside class="bl-serverbar">
+            <div class="bl-serverbar-top">
+                <a href="/dashboard" class="bl-server-home">BL</a>
+            </div>
+
+            <div class="bl-server-list">
+                {% for guild in sidebar_guilds %}
+                    <a href="/guild/{{ guild.id }}" class="bl-server-icon" title="{{ guild.name }}">
+                        {% if guild.icon_url %}
+                            <img src="{{ guild.icon_url }}" alt="{{ guild.name }}">
+                        {% else %}
+                            <span>{{ guild.name[:2]|upper }}</span>
+                        {% endif %}
+                    </a>
+                {% endfor %}
+            </div>
+        </aside>
+
+        <aside class="bl-sidebar">
+            <div class="bl-profile-card">
+                <div class="bl-avatar-ring">
+                    <div class="bl-avatar">{{ user.username[:2]|upper }}</div>
+                </div>
+                <h2 class="bl-username">{{ user.username }}</h2>
+                <p class="bl-subtext">Panel BloodLine</p>
+            </div>
+
+            <nav class="bl-side-menu">
+                <a href="/dashboard" class="bl-side-link">Dashboard</a>
+                <a href="/profile" class="bl-side-link active">Profil</a>
+                <a href="/security" class="bl-side-link">Sécurité</a>
+                <a href="/premium" class="bl-side-link">Premium</a>
+                <a href="/logout" class="bl-side-link">Déconnexion</a>
+            </nav>
+        </aside>
+
+        <main class="bl-main">
+            <header class="bl-topbar">
+                <div class="bl-brand-left">
+                    <div class="bl-logo-text">
+                        <img src="{{ url_for('static', filename='logo_bloodline.png') }}" alt="BloodLine" class="bl-logo-img">
+                    </div>
+                </div>
+
+                <div class="bl-top-nav">
+                    <a href="/dashboard" class="bl-top-link">Accueil</a>
+                    <a href="/servers" class="bl-top-link">Serveurs</a>
+                    <a href="/modules" class="bl-top-link">Modules</a>
+                    <a href="{{ support_invite }}" target="_blank" class="bl-top-link">Support</a>
+                </div>
+
+                <div class="bl-top-user">
+                    <div class="bl-top-user-badge">{{ user.username }}</div>
+                </div>
+            </header>
+
+            <section class="bl-content-card">
+                <div class="bl-profile-page">
+                    <div class="bl-big-avatar">
+                        {% if avatar_url %}
+                            <img src="{{ avatar_url }}" alt="Avatar">
+                        {% else %}
+                            <span>{{ user.username[:2]|upper }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="bl-profile-info">
+                        <h1>{{ user.username }}</h1>
+                        <p><strong>ID Discord :</strong> {{ user.id }}</p>
+                        {% if user.global_name %}
+                            <p><strong>Nom global :</strong> {{ user.global_name }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>BloodLine Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="bl-body">
+
+    <!-- 🔴 LOADING SCREEN -->
+    <div id="bl-loader">
+        <img src="{{ url_for('static', filename='logo_bloodline.png') }}">
+        <span>CHARGEMENT...</span>
+    </div>
+
+    <!-- 🔴 EFFETS -->
+    <div class="bl-smoke"></div>
+    <div class="bl-particles"></div>
+
+    <div class="bl-app">
+
+        <!-- SERVER BAR -->
+        <aside class="bl-serverbar">
+            <div class="bl-serverbar-top">
+                <a href="/dashboard" class="bl-server-home">BL</a>
+            </div>
+
+            <div class="bl-server-list">
+                {% for guild in sidebar_guilds %}
+                <a href="/guild/{{ guild.id }}" class="bl-server-icon">
+                    {% if guild.icon_url %}
+                        <img src="{{ guild.icon_url }}">
+                    {% else %}
+                        <span>{{ guild.name[:2]|upper }}</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+        </aside>
+
+        <!-- SIDEBAR -->
+        <aside class="bl-sidebar">
+
+            <div class="bl-profile-card">
+                <div class="bl-avatar-ring">
+                    <div class="bl-avatar">
+                        {{ user.username[:2]|upper }}
+                    </div>
+                </div>
+
+                <h2 class="bl-username">{{ user.username }}</h2>
+                <p class="bl-subtext">Panel BloodLine</p>
+            </div>
+
+            <nav class="bl-side-menu">
+                <a href="/dashboard" class="bl-side-link active">Dashboard</a>
+                <a href="/profile" class="bl-side-link">Profil</a>
+                <a href="/security" class="bl-side-link">Sécurité</a>
+                <a href="/premium" class="bl-side-link">Premium</a>
+                <a href="/logout" class="bl-side-link">Déconnexion</a>
+            </nav>
+
+        </aside>
+
+        <!-- MAIN -->
+        <main class="bl-main">
+
+            <!-- HEADER -->
+            <header class="bl-topbar">
+
+                <div class="bl-header-left">
+                    <img src="{{ url_for('static', filename='logo_bloodline.png') }}" class="bl-logo-header">
+                </div>
+
+                <div class="bl-top-nav">
+                    <a href="/dashboard" class="bl-top-link active">Accueil</a>
+                    <a href="/servers" class="bl-top-link">Serveurs</a>
+                    <a href="/modules" class="bl-top-link">Modules</a>
+                    <a href="https://discord.gg/BWwmaUDCV8" target="_blank" class="bl-top-link">Support</a>
+                </div>
+
+                <div class="bl-top-user">
+                    <div class="bl-top-user-badge">
+                        {{ user.username }}
+                    </div>
+                </div>
+
+            </header>
+
+            <!-- HERO -->
+            <section class="bl-hero-card">
+                <div class="bl-card-glow"></div>
+                <h1>BIENVENUE SUR BLOODLINE</h1>
+                <p>Interface immersive et stylée pour ton serveur RP.</p>
+            </section>
+
+            <!-- STATS -->
+            <section class="bl-stats-grid">
+
+                <div class="bl-stat-card">
+                    <h3>Serveurs</h3>
+                    <div class="bl-stat-number">{{ guilds|length }}</div>
+                    <p>Serveurs disponibles</p>
+                </div>
+
+                <div class="bl-stat-card">
+                    <h3>Modules</h3>
+                    <div class="bl-stat-number">8+</div>
+                    <p>Modules actifs</p>
+                </div>
+
+                <div class="bl-stat-card">
+                    <h3>Status</h3>
+                    <div class="bl-stat-number">Online</div>
+                    <p>Bot opérationnel</p>
+                </div>
+
+            </section>
+
+            <!-- SERVERS -->
+            <section class="bl-content-card">
+
+                <div class="bl-section-title">
+                    <h2>TES SERVEURS</h2>
+                    <span>Choisis un serveur</span>
+                </div>
+
+                <div class="bl-server-grid">
+
+                    {% for guild in guilds %}
+                    <div class="bl-server-card">
+
+                        <a href="/guild/{{ guild.id }}" style="display: flex; align-items: center; gap: 15px; text-decoration: none; color: inherit; flex: 1;">
+
+                            <div class="bl-server-card-icon">
+                                {% if guild.icon_url %}
+                                    <img src="{{ guild.icon_url }}">
+                                {% else %}
+                                    <span>{{ guild.name[:2]|upper }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="bl-server-card-info">
+                                <h3>{{ guild.name }}</h3>
+                                <p>ID : {{ guild.id }}</p>
+                            </div>
+
+                        </a>
+
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <a href="/guild/{{ guild.id }}" class="bl-top-link">
+                                Config
+                            </a>
+
+                            <a href="/guild/{{ guild.id }}/custom" class="bl-top-link">
+                                Custom RP
+                            </a>
+
+                            <div class="bl-server-card-arrow">→</div>
+                        </div>
+
+                    </div>
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <!-- 🔊 AUDIO -->
+    <audio id="bl-sound" preload="auto">
+        <source src="{{ url_for('static', filename='bloodline_sound.mp3') }}" type="audio/mpeg">
+    </audio>
+
+    <!-- 🎬 TRANSITION -->
+    <script>
+    document.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", function(e) {
+            if (this.href && this.target !== "_blank") {
+                e.preventDefault();
+                document.body.classList.add("fade-out");
+
+                setTimeout(() => {
+                    window.location = this.href;
+                }, 300);
+            }
+        });
+    });
+    </script>
+
+    <!-- 🔥 LOADER + SON -->
+    <script>
+    let soundPlayed = false;
+
+    function playSound() {
+        if (soundPlayed) return;
+
+        const sound = document.getElementById("bl-sound");
+        if (sound) {
+            sound.volume = 0.4;
+            sound.play().catch(() => {});
+            soundPlayed = true;
+        }
+    }
+
+    document.addEventListener("click", playSound);
+
+    window.addEventListener("load", () => {
+        const loader = document.getElementById("bl-loader");
+
+        setTimeout(() => {
+            loader.classList.add("hide");
+
+            setTimeout(() => {
+                loader.style.display = "none";
+            }, 500);
+
+        }, 1000);
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuration {{ guild.name }} - BloodLine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .bl-role-builder,
+        .bl-channel-builder {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .bl-role-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .bl-role-row select {
+            flex: 1;
+            padding: 14px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 0, 0, 0.15);
+            background: rgba(10, 10, 10, 0.9);
+            color: #fff;
+            outline: none;
+        }
+
+        .bl-role-btn {
+            min-width: 42px;
+            height: 42px;
+            border: 1px solid rgba(255, 0, 0, 0.22);
+            border-radius: 12px;
+            background: #151515;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .bl-role-btn:hover {
+            border-color: rgba(255, 80, 80, 0.42);
+            box-shadow: 0 0 12px rgba(255, 0, 0, 0.12);
+        }
+
+        .bl-role-help {
+            color: #bdbdbd;
+            font-size: 0.88rem;
+            margin-top: 4px;
+        }
+
+
+        .bl-legal-job-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .bl-legal-job-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr auto auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .bl-legal-job-row select,
+        .bl-legal-job-row input {
+            width: 100%;
+            padding: 14px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 0, 0, 0.15);
+            background: rgba(10, 10, 10, 0.9);
+            color: #fff;
+            outline: none;
+        }
+
+        @media (max-width: 900px) {
+            .bl-legal-job-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="bl-body">
+
+    <div class="bl-app">
+
+        <aside class="bl-serverbar">
+            <div class="bl-serverbar-top">
+                <a href="/dashboard" class="bl-server-home">BL</a>
+            </div>
+
+            <div class="bl-server-list">
+                {% for sidebar_guild in sidebar_guilds %}
+                <a href="/guild/{{ sidebar_guild.id }}" class="bl-server-icon {% if sidebar_guild.id == guild.id %}active{% endif %}" title="{{ sidebar_guild.name }}">
+                    {% if sidebar_guild.icon_url %}
+                        <img src="{{ sidebar_guild.icon_url }}" alt="{{ sidebar_guild.name }}">
+                    {% else %}
+                        <span>{{ sidebar_guild.name[:2]|upper }}</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+        </aside>
+
+        <aside class="bl-sidebar">
+            <div class="bl-profile-card">
+                <div class="bl-avatar-ring">
+                    <div class="bl-avatar">
+                        {% if guild.icon_url %}
+                            <img src="{{ guild.icon_url }}" alt="{{ guild.name }}">
+                        {% else %}
+                            {{ guild.name[:2]|upper }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <h2 class="bl-username">{{ guild.name }}</h2>
+                <p class="bl-subtext">Configuration serveur</p>
+            </div>
+
+            <nav class="bl-side-menu">
+                <a href="/dashboard" class="bl-side-link">Dashboard</a>
+                <a href="/servers" class="bl-side-link active">Serveurs</a>
+                <a href="/modules" class="bl-side-link">Modules</a>
+                <a href="/premium" class="bl-side-link">Premium</a>
+                <a href="/logout" class="bl-side-link">Déconnexion</a>
+            </nav>
+        </aside>
+
+        <main class="bl-main">
+
+            <header class="bl-topbar">
+                <div class="bl-header-left">
+                    <img src="{{ url_for('static', filename='logo_bloodline.png') }}" class="bl-logo-header" alt="BloodLine">
+                </div>
+
+                <div class="bl-top-nav">
+                    <a href="/dashboard" class="bl-top-link">Accueil</a>
+                    <a href="/servers" class="bl-top-link active">Serveurs</a>
+                    <a href="/modules" class="bl-top-link">Modules</a>
+                    <a href="{{ support_invite }}" target="_blank" class="bl-top-link">Support</a>
+                </div>
+
+                <div class="bl-top-user">
+                    <div class="bl-top-user-badge">{{ user.username }}</div>
+                </div>
+            </header>
+
+            <section class="bl-hero-card small">
+                <div class="bl-card-glow"></div>
+                <h1>CONFIGURATION DE {{ guild.name|upper }}</h1>
+                <p>Active, désactive et règle chaque commande du bot pour ce serveur.</p>
+            </section>
+
+            <section class="bl-content-card" style="margin-bottom: 22px;">
+                <div class="bl-section-title">
+                    <h2>Gestion RP avancée</h2>
+                    <span>Gère les boutiques et le marché noir directement depuis le dashboard.</span>
+                </div>
+
+                <div class="bl-actions" style="justify-content:flex-start; flex-wrap:wrap;">
+                    <a href="{{ url_for('dashboard_boutiques', guild_id=guild.id) }}" class="bl-btn-primary" style="text-decoration:none;">
+                        🏪 Gérer les boutiques
+                    </a>
+
+                    <a href="{{ url_for('dashboard_darknet', guild_id=guild.id) }}" class="bl-btn-secondary" style="text-decoration:none;">
+                        🕶️ Marché noir
+                    </a>
+                </div>
+            </section>
+
+            <form method="POST" class="bl-form-layout">
+
+                <section class="bl-content-card" style="margin-bottom: 22px;">
+                    <div class="bl-section-title">
+                        <h2>Ajout métiers légaux</h2>
+                        <span>Ajoute les métiers qui pourront utiliser /service avec leur rôle Discord.</span>
+                    </div>
+
+                    <div class="bl-field" style="grid-column: 1 / -1;">
+                        <label>Métiers autorisés à prendre leur service</label>
+                        <div class="bl-legal-job-list"
+                             data-legal-jobs-builder
+                             data-selected='{{ service_legal_jobs | tojson | safe }}'>
+                        </div>
+                        <div class="bl-role-help">Le joueur devra posséder au moins un de ces rôles pour prendre son service. Si le nom affiché est vide, le bot utilisera le nom du rôle.</div>
+                    </div>
+                </section>
+
+                {% for category, commands in categorized_commands.items() %}
+                <section class="bl-content-card bl-category-block">
+                    <div class="bl-section-title">
+                        <h2>{{ category }}</h2>
+                        <span>Réglages des commandes de la catégorie {{ category.lower() }}</span>
+                    </div>
+
+                    {% for command_name, command in commands %}
+                    <div class="bl-command-card">
+                        <div class="bl-command-header">
+                            <h3>/{{ command_name }}</h3>
+
+                            <label class="bl-toggle-inline">
+                                <input type="checkbox" name="{{ command_name }}_enabled" {% if command['enabled'] == 1 %}checked{% endif %}>
+                                Activée
+                            </label>
+                        </div>
+
+                        <div class="bl-form-grid">
+
+                            <div class="bl-field">
+                                <label>Rôles autorisés</label>
+                                <div class="bl-role-builder"
+                                     data-role-builder
+                                     data-name="{{ command_name }}_allowed_roles"
+                                     data-selected='{{ command_allowed_role_ids.get(command_name, []) | tojson | safe }}'>
+                                </div>
+                                <div class="bl-role-help">Sélectionne un ou plusieurs rôles autorisés.</div>
+                            </div>
+
+                            <div class="bl-field">
+                                <label>Rôles bloqués</label>
+                                <div class="bl-role-builder"
+                                     data-role-builder
+                                     data-name="{{ command_name }}_blocked_roles"
+                                     data-selected='{{ command_blocked_role_ids.get(command_name, []) | tojson | safe }}'>
+                                </div>
+                                <div class="bl-role-help">Les membres avec ces rôles seront bloqués.</div>
+                            </div>
+
+                            <div class="bl-field">
+                                <label>Salons autorisés</label>
+                                <div class="bl-channel-builder"
+                                     data-channel-builder
+                                     data-name="{{ command_name }}_channel_id"
+                                     data-selected='{{ (command["channel_id"] or "").split(",") | tojson | safe }}'>
+                                </div>
+                                <div class="bl-role-help">Sélectionne un ou plusieurs salons autorisés.</div>
+                            </div>
+
+                            <div class="bl-field">
+                                <label>Salons logs</label>
+                                <div class="bl-channel-builder"
+                                     data-channel-builder
+                                     data-name="{{ command_name }}_log_channel_id"
+                                     data-selected='{{ (command["log_channel_id"] or "").split(",") | tojson | safe }}'>
+                                </div>
+                                <div class="bl-role-help">Sélectionne un ou plusieurs salons logs.</div>
+                            </div>
+
+                            {% if command_name in ["braquage_superette", "braquage_banque", "braquage_bijouterie"] %}
+                                <div class="bl-field">
+                                    <label>Temps du braquage (secondes)</label>
+                                    <input type="text" name="{{ command_name }}_custom_1" value="{{ command['custom_value_1'] or '300' }}" placeholder="ex: 300">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Butin minimum</label>
+                                    <input type="text" name="{{ command_name }}_custom_2" value="{{ command['custom_value_2'] or '1000' }}" placeholder="ex: 1000">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Butin maximum</label>
+                                    <input type="text" name="{{ command_name }}_custom_3" value="{{ command['custom_value_3'] or '5000' }}" placeholder="ex: 5000">
+                                </div>
+
+                            {% elif command_name in ["drogue_recolter_weed", "drogue_recolter_cocaine", "drogue_recolter_meth"] %}
+                                <div class="bl-field">
+                                    <label>Temps de récolte (secondes)</label>
+                                    <input type="text" name="{{ command_name }}_custom_1" value="{{ command['custom_value_1'] or '60' }}" placeholder="ex: 60">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Quantité minimum récoltée</label>
+                                    <input type="text" name="{{ command_name }}_custom_2" value="{{ command['custom_value_2'] or '1' }}" placeholder="ex: 1">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Quantité maximum récoltée</label>
+                                    <input type="text" name="{{ command_name }}_custom_3" value="{{ command['custom_value_3'] or '3' }}" placeholder="ex: 3">
+                                </div>
+
+                            {% elif command_name in ["drogue_traiter_weed", "drogue_traiter_cocaine", "drogue_traiter_meth"] %}
+                                <div class="bl-field">
+                                    <label>Temps de traitement (secondes)</label>
+                                    <input type="text" name="{{ command_name }}_custom_1" value="{{ command['custom_value_1'] or '90' }}" placeholder="ex: 90">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Quantité minimum traitée</label>
+                                    <input type="text" name="{{ command_name }}_custom_2" value="{{ command['custom_value_2'] or '1' }}" placeholder="ex: 1">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Quantité maximum traitée</label>
+                                    <input type="text" name="{{ command_name }}_custom_3" value="{{ command['custom_value_3'] or '2' }}" placeholder="ex: 2">
+                                </div>
+
+                            {% elif command_name in ["drogue_vente_weed", "drogue_vente_cocaine", "drogue_vente_meth"] %}
+                                <div class="bl-field">
+                                    <label>Temps de vente (secondes)</label>
+                                    <input type="text" name="{{ command_name }}_custom_1" value="{{ command['custom_value_1'] or '45' }}" placeholder="ex: 45">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Gain minimum</label>
+                                    <input type="text" name="{{ command_name }}_custom_2" value="{{ command['custom_value_2'] or '500' }}" placeholder="ex: 500">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Gain maximum</label>
+                                    <input type="text" name="{{ command_name }}_custom_3" value="{{ command['custom_value_3'] or '1500' }}" placeholder="ex: 1500">
+                                </div>
+
+                            {% elif command_name == "planque" %}
+                                <div class="bl-field">
+                                    <label>Limite argent sale planque</label>
+                                    <input type="text" name="{{ command_name }}_custom_1" value="{{ command['custom_value_1'] or '50000' }}" placeholder="ex: 50000">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Limite drogue totale planque</label>
+                                    <input type="text" name="{{ command_name }}_custom_2" value="{{ command['custom_value_2'] or '200' }}" placeholder="ex: 200">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Réserve</label>
+                                    <input type="text" name="{{ command_name }}_custom_3" value="{{ command['custom_value_3'] or '' }}" placeholder="Option future">
+                                </div>
+
+                            {% elif command_name == "coffre_voiture" %}
+                                <div class="bl-field">
+                                    <label>Limite argent sale coffre véhicule</label>
+                                    <input type="text" name="{{ command_name }}_custom_1" value="{{ command['custom_value_1'] or '100000' }}" placeholder="ex: 100000">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Limite drogue totale coffre véhicule</label>
+                                    <input type="text" name="{{ command_name }}_custom_2" value="{{ command['custom_value_2'] or '400' }}" placeholder="ex: 400">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Réserve</label>
+                                    <input type="text" name="{{ command_name }}_custom_3" value="{{ command['custom_value_3'] or '' }}" placeholder="Option future">
+                                </div>
+
+                            {% elif command_name == "agence_immobiliere" %}
+                                <div class="bl-field">
+                                    <label>Nombre maximum de biens</label>
+                                    <input type="text" name="{{ command_name }}_custom_1" value="{{ command['custom_value_1'] or '100' }}" placeholder="ex: 100">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Prix maximum autorisé</label>
+                                    <input type="text" name="{{ command_name }}_custom_2" value="{{ command['custom_value_2'] or '1000000' }}" placeholder="ex: 1000000">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Réserve</label>
+                                    <input type="text" name="{{ command_name }}_custom_3" value="{{ command['custom_value_3'] or '' }}" placeholder="Option future">
+                                </div>
+
+                            {% elif command_name == "service" %}
+                                <div class="bl-field" style="grid-column: 1 / -1;">
+                                    <label>Configuration service</label>
+                                    <input type="text" value="Les métiers légaux se configurent dans la catégorie Ajout métiers légaux au-dessus." readonly>
+                                    <div class="bl-role-help">Le salon autorisé = salon où /service peut être utilisé. Le salon logs = logs prise/fin de service.</div>
+                                </div>
+
+                            {% elif command_name == "pret_bancaire" %}
+                                <div class="bl-field">
+                                    <label>Montant minimum du prêt</label>
+                                    <input type="text" name="{{ command_name }}_custom_1" value="{{ command['custom_value_1'] or '1000' }}" placeholder="ex: 1000">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Montant maximum du prêt</label>
+                                    <input type="text" name="{{ command_name }}_custom_2" value="{{ command['custom_value_2'] or '25000' }}" placeholder="ex: 25000">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Taux d’intérêt (%)</label>
+                                    <input type="text" name="{{ command_name }}_custom_3" value="{{ command['custom_value_3'] or '15' }}" placeholder="ex: 15">
+                                </div>
+
+                                <div class="bl-field" style="grid-column: 1 / -1;">
+                                    <label>Rôles bancaires pouvant accepter/refuser les prêts</label>
+                                    <div class="bl-role-builder"
+                                         data-role-builder
+                                         data-name="{{ command_name }}_custom_4"
+                                         data-selected='{{ command_custom_role_ids.get(command_name, []) | tojson | safe }}'>
+                                    </div>
+                                    <div class="bl-role-help">Ces rôles pourront utiliser les validations bancaires.</div>
+                                </div>
+
+                            {% elif command_name == "session" %}
+                                <div class="bl-field">
+                                    <label>Salon logs (ID)</label>
+                                    <input type="text"
+                                           name="{{ command_name }}_custom_1"
+                                           value="{{ command['custom_value_1'] or '' }}"
+                                           placeholder="ID du salon logs">
+                                </div>
+
+                                <div class="bl-field" style="grid-column: 1 / -1;">
+                                    <label>Rôles pouvant être ping par la session</label>
+                                    <div class="bl-role-builder"
+                                         data-role-builder
+                                         data-name="{{ command_name }}_custom_2"
+                                         data-selected='{{ command_custom_role_ids.get(command_name, []) | tojson | safe }}'>
+                                    </div>
+                                    <div class="bl-role-help">Ces rôles peuvent être mentionnés dans /session.</div>
+                                </div>
+
+                            {% else %}
+                                <div class="bl-field">
+                                    <label>Option personnalisée 1</label>
+                                    <input type="text" name="{{ command_name }}_custom_1" value="{{ command['custom_value_1'] or '' }}" placeholder="Option 1">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Option personnalisée 2</label>
+                                    <input type="text" name="{{ command_name }}_custom_2" value="{{ command['custom_value_2'] or '' }}" placeholder="Option 2">
+                                </div>
+                                <div class="bl-field">
+                                    <label>Option personnalisée 3</label>
+                                    <input type="text" name="{{ command_name }}_custom_3" value="{{ command['custom_value_3'] or '' }}" placeholder="Option 3">
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </section>
+                {% endfor %}
+
+                <div class="bl-actions">
+                    <button type="submit" class="bl-btn-primary">Sauvegarder la configuration</button>
+                    <a href="/servers" class="bl-btn-secondary">Retour</a>
+                </div>
+            </form>
+
+        </main>
+    </div>
+
+    <script>
+        const guildRoles = {{ guild_roles | tojson | safe }};
+        const guildChannels = {{ guild_channels | tojson | safe }};
+
+        function buildRoleOption(role, selectedId = null) {
+            const option = document.createElement("option");
+            option.value = String(role.id);
+            option.textContent = role.name;
+            if (selectedId && String(role.id) === String(selectedId)) {
+                option.selected = true;
+            }
+            return option;
+        }
+
+        function createRoleSelect(inputName, selectedId = "") {
+            const row = document.createElement("div");
+            row.className = "bl-role-row";
+
+            const select = document.createElement("select");
+            select.name = inputName;
+
+            const empty = document.createElement("option");
+            empty.value = "";
+            empty.textContent = "-- Choisir un rôle --";
+            select.appendChild(empty);
+
+            guildRoles.forEach(role => {
+                select.appendChild(buildRoleOption(role, selectedId));
+            });
+
+            const addBtn = document.createElement("button");
+            addBtn.type = "button";
+            addBtn.className = "bl-role-btn";
+            addBtn.textContent = "+";
+
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "bl-role-btn";
+            removeBtn.textContent = "−";
+
+            addBtn.addEventListener("click", () => {
+                row.parentElement.appendChild(createRoleSelect(inputName, ""));
+            });
+
+            removeBtn.addEventListener("click", () => {
+                const parent = row.parentElement;
+                if (parent.querySelectorAll(".bl-role-row").length > 1) {
+                    row.remove();
+                } else {
+                    select.value = "";
+                }
+            });
+
+            row.appendChild(select);
+            row.appendChild(addBtn);
+            row.appendChild(removeBtn);
+
+            return row;
+        }
+
+        function buildChannelOption(channel, selectedId = null) {
+            const option = document.createElement("option");
+            option.value = String(channel.id);
+            option.textContent = "# " + channel.name;
+
+            if (selectedId && String(channel.id) === String(selectedId)) {
+                option.selected = true;
+            }
+
+            return option;
+        }
+
+        function createChannelSelect(inputName, selectedId = "") {
+            const row = document.createElement("div");
+            row.className = "bl-role-row";
+
+            const select = document.createElement("select");
+            select.name = inputName;
+
+            const empty = document.createElement("option");
+            empty.value = "";
+            empty.textContent = "-- Choisir un salon --";
+            select.appendChild(empty);
+
+            guildChannels.forEach(channel => {
+                select.appendChild(buildChannelOption(channel, selectedId));
+            });
+
+            const addBtn = document.createElement("button");
+            addBtn.type = "button";
+            addBtn.className = "bl-role-btn";
+            addBtn.textContent = "+";
+
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "bl-role-btn";
+            removeBtn.textContent = "−";
+
+            addBtn.addEventListener("click", () => {
+                row.parentElement.appendChild(createChannelSelect(inputName, ""));
+            });
+
+            removeBtn.addEventListener("click", () => {
+                const parent = row.parentElement;
+
+                if (parent.querySelectorAll(".bl-role-row").length > 1) {
+                    row.remove();
+                } else {
+                    select.value = "";
+                }
+            });
+
+            row.appendChild(select);
+            row.appendChild(addBtn);
+            row.appendChild(removeBtn);
+
+            return row;
+        }
+
+
+        function createLegalJobRow(job = {}) {
+            const row = document.createElement("div");
+            row.className = "bl-legal-job-row";
+
+            const roleSelect = document.createElement("select");
+            roleSelect.name = "service_job_role_id";
+
+            const emptyRole = document.createElement("option");
+            emptyRole.value = "";
+            emptyRole.textContent = "-- Choisir un rôle métier --";
+            roleSelect.appendChild(emptyRole);
+
+            guildRoles.forEach(role => {
+                roleSelect.appendChild(buildRoleOption(role, job.role_id || ""));
+            });
+
+            const nameInput = document.createElement("input");
+            nameInput.type = "text";
+            nameInput.name = "service_job_name";
+            nameInput.placeholder = "Nom affiché du métier, ex: Gendarmerie";
+            nameInput.value = job.name || "";
+
+            const addBtn = document.createElement("button");
+            addBtn.type = "button";
+            addBtn.className = "bl-role-btn";
+            addBtn.textContent = "+";
+
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "bl-role-btn";
+            removeBtn.textContent = "−";
+
+            addBtn.addEventListener("click", () => {
+                row.parentElement.appendChild(createLegalJobRow({}));
+            });
+
+            removeBtn.addEventListener("click", () => {
+                const parent = row.parentElement;
+                if (parent.querySelectorAll(".bl-legal-job-row").length > 1) {
+                    row.remove();
+                } else {
+                    roleSelect.value = "";
+                    nameInput.value = "";
+                }
+            });
+
+            row.appendChild(roleSelect);
+            row.appendChild(nameInput);
+            row.appendChild(addBtn);
+            row.appendChild(removeBtn);
+
+            return row;
+        }
+
+        document.querySelectorAll("[data-legal-jobs-builder]").forEach(container => {
+            let selected = [];
+
+            try {
+                selected = JSON.parse(container.dataset.selected || "[]");
+            } catch (e) {
+                selected = [];
+            }
+
+            if (!selected.length) {
+                container.appendChild(createLegalJobRow({}));
+            } else {
+                selected.forEach(job => {
+                    container.appendChild(createLegalJobRow(job));
+                });
+            }
+        });
+
+        document.querySelectorAll("[data-role-builder]").forEach(container => {
+            const inputName = container.dataset.name;
+            let selected = [];
+
+            try {
+                selected = JSON.parse(container.dataset.selected || "[]");
+            } catch (e) {
+                selected = [];
+            }
+
+            if (!selected.length) {
+                container.appendChild(createRoleSelect(inputName, ""));
+            } else {
+                selected.forEach(roleId => {
+                    container.appendChild(createRoleSelect(inputName, roleId));
+                });
+            }
+        });
+
+        document.querySelectorAll("[data-channel-builder]").forEach(container => {
+            const inputName = container.dataset.name;
+            let selected = [];
+
+            try {
+                selected = JSON.parse(container.dataset.selected || "[]")
+                    .filter(id => String(id).trim() !== "");
+            } catch (e) {
+                selected = [];
+            }
+
+            if (!selected.length) {
+                container.appendChild(createChannelSelect(inputName, ""));
+            } else {
+                selected.forEach(channelId => {
+                    container.appendChild(createChannelSelect(inputName, channelId));
+                });
+            }
+        });
+    </script>
+</body>
+</html>
