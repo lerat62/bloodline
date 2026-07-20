@@ -1,9 +1,8 @@
 import json
-import sqlite3
-from pathlib import Path
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from typing import Any
-
-DB_PATH = Path(__file__).resolve().parent / "database.db"
 
 COMMAND_CATEGORIES: dict[str, list[str]] = {
     "Économie": [
@@ -130,10 +129,11 @@ for _, commands in COMMAND_CATEGORIES.items():
             ALL_COMMANDS.append(cmd)
 
 
-def get_connection() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+def get_connection():
+    return psycopg2.connect(
+        os.getenv("DATABASE_URL"),
+        cursor_factory=RealDictCursor
+    )
 
 
 def ensure_extra_columns() -> None:
