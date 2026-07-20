@@ -31,10 +31,10 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "bloodline_secret_key")
 # =========================
 # DISCORD OAUTH / BOT CONFIG
 # =========================
-CLIENT_ID ="1491454272326598796"
+CLIENT_ID ="1528660431416328253"
 CLIENT_SECRET ="QCoFxMtUFFBeLKsT2IsFEdUZ5kaXRX2G"
 REDIRECT_URI ="https://bloodline-tau.vercel.app"
-BOT_TOKEN ="MTQ5MTQ1NDI3MjMyNjU5ODc5Ng.G2zCvd.c8G3rUrj0SFEzNE4qYbu8AuA6Eo4hmyiIkh1Yk"
+BOT_TOKEN ="MTQ5MTQ1NDI3MjMyNjU5ODc5Ng.GpRFsC.JAkK_yD16WI_VCYkrUS-CEYXIYs9AZwp8Q5Tp8"
 
 DISCORD_API = "https://discord.com/api"
 SUPPORT_INVITE =("SUPPORT_INVITE", "https://discord.gg/BWwmaUDCV8")
