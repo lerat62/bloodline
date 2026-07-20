@@ -33,7 +33,7 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "bloodline_secret_key")
 # =========================
 CLIENT_ID ="1491454272326598796"
 CLIENT_SECRET ="QCoFxMtUFFBeLKsT2IsFEdUZ5kaXRX2G"
-REDIRECT_URI ="http://127.0.0.1:5000/callback"
+REDIRECT_URI ="https://bloodline-tau.vercel.app"
 BOT_TOKEN ="MTQ5MTQ1NDI3MjMyNjU5ODc5Ng.G2zCvd.c8G3rUrj0SFEzNE4qYbu8AuA6Eo4hmyiIkh1Yk"
 
 DISCORD_API = "https://discord.com/api"
