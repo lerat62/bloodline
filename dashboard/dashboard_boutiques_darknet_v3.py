@@ -47,11 +47,11 @@ DARKNET_ITEMS_HTML = """<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-
 def _ensure_dashboard_tables():
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("""CREATE TABLE IF NOT EXISTS shops (id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, name TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP, UNIQUE(guild_id, name))""")
-    cur.execute("""CREATE TABLE IF NOT EXISTS shop_items (id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, shop_name TEXT NOT NULL, item_name TEXT NOT NULL, stock INTEGER NOT NULL DEFAULT 0, price INTEGER NOT NULL DEFAULT 0, UNIQUE(guild_id, shop_name, item_name))""")
-    cur.execute("""CREATE TABLE IF NOT EXISTS darknet_market_posts (id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, seller_id INTEGER NOT NULL DEFAULT 0, title TEXT NOT NULL, description TEXT NOT NULL, price INTEGER NOT NULL, contact_info TEXT NOT NULL, is_active INTEGER DEFAULT 1, created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
-    cur.execute("""CREATE TABLE IF NOT EXISTS darknet_shops (id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, name TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP, UNIQUE(guild_id, name))""")
-    cur.execute("""CREATE TABLE IF NOT EXISTS darknet_items (id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, shop_name TEXT NOT NULL, item_name TEXT NOT NULL, stock INTEGER NOT NULL DEFAULT 0, price INTEGER NOT NULL DEFAULT 0, UNIQUE(guild_id, shop_name, item_name))""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS shops (id SERIAL PRIMARY KEY, guild_id TEXT NOT NULL, name TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP, UNIQUE(guild_id, name))""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS shop_items (id SERIAL PRIMARY KEY, guild_id TEXT NOT NULL, shop_name TEXT NOT NULL, item_name TEXT NOT NULL, stock INTEGER NOT NULL DEFAULT 0, price INTEGER NOT NULL DEFAULT 0, UNIQUE(guild_id, shop_name, item_name))""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS darknet_market_posts (id SERIAL PRIMARY KEY, guild_id TEXT NOT NULL, seller_id INTEGER NOT NULL DEFAULT 0, title TEXT NOT NULL, description TEXT NOT NULL, price INTEGER NOT NULL, contact_info TEXT NOT NULL, is_active INTEGER DEFAULT 1, created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS darknet_shops (id SERIAL PRIMARY KEY, guild_id TEXT NOT NULL, name TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP, UNIQUE(guild_id, name))""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS darknet_items (id SERIAL PRIMARY KEY, guild_id TEXT NOT NULL, shop_name TEXT NOT NULL, item_name TEXT NOT NULL, stock INTEGER NOT NULL DEFAULT 0, price INTEGER NOT NULL DEFAULT 0, UNIQUE(guild_id, shop_name, item_name))""")
     conn.commit()
     conn.close()
 
