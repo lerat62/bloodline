@@ -164,7 +164,7 @@ def ensure_extra_columns():
 
 
     
-    def init_db():
+def init_db():
 
     conn = get_connection()
     cursor = conn.cursor()
