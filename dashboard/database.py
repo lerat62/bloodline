@@ -736,3 +736,5 @@ async def update_shop_item_stock(
 
     conn.commit()
     conn.close()
+
+init_db()
