@@ -1,4 +1,3 @@
-
 from flask import render_template_string, request, redirect, url_for, session
 from database import get_connection
 
@@ -78,7 +77,8 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         if not guild:
             return "❌ Serveur introuvable ou accès refusé."
         conn = get_connection()
-        shops = conn.execute("SELECT * FROM shops WHERE guild_id = ? ORDER BY name ASC", (str(guild_id),)).fetchall()
+        shops = cur = conn.cursor()
+        shops = cur.execute("SELECT * FROM shops WHERE guild_id = %s ORDER BY name ASC", (str(guild_id),)).fetchall()
         conn.close()
         return render_template_string(BOUTIQUES_HTML, user=user, guild=guild, sidebar_guilds=sidebar, support_invite=support_invite, shops=shops)
 
@@ -89,7 +89,9 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         name = request.form.get("name", "").strip()
         if name:
             conn = get_connection()
-            conn.execute("INSERT OR IGNORE INTO shops (guild_id, name) VALUES (?, ?)", (str(guild_id), name))
+            cur = conn.cursor()
+            cur.execute("INSERT INTO shops (guild_id, name) VALUES (%s, %s)
+            ON CONFLICT (guild_id, name) DO NOTHING", (str(guild_id), name))
             conn.commit()
             conn.close()
         return redirect(url_for("dashboard_boutiques", guild_id=guild_id))
@@ -99,10 +101,13 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         if "access_token" not in session:
             return redirect(url_for("home"))
         conn = get_connection()
-        shop = conn.execute("SELECT * FROM shops WHERE id = ? AND guild_id = ?", (shop_id, str(guild_id))).fetchone()
+        shop = cur = conn.cursor()
+        shop = cur.execute("SELECT * FROM shops WHERE id = %s AND guild_id = ?", (shop_id, str(guild_id))).fetchone()
         if shop:
-            conn.execute("DELETE FROM shop_items WHERE guild_id = ? AND shop_name = ?", (str(guild_id), shop["name"]))
-            conn.execute("DELETE FROM shops WHERE id = ? AND guild_id = ?", (shop_id, str(guild_id)))
+            cur = conn.cursor()
+            cur.execute("DELETE FROM shop_items WHERE guild_id = %s AND shop_name = %s", (str(guild_id), shop["name"]))
+            cur = conn.cursor()
+            cur.execute("DELETE FROM shops WHERE id = %s AND guild_id = ?", (shop_id, str(guild_id)))
             conn.commit()
         conn.close()
         return redirect(url_for("dashboard_boutiques", guild_id=guild_id))
@@ -116,7 +121,8 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         if not guild:
             return "❌ Serveur introuvable ou accès refusé."
         conn = get_connection()
-        items = conn.execute("SELECT * FROM shop_items WHERE guild_id = ? AND shop_name = ? ORDER BY item_name ASC", (str(guild_id), shop_name)).fetchall()
+        items = cur = conn.cursor()
+        items = cur.execute("SELECT * FROM shop_items WHERE guild_id = %s AND shop_name = %s ORDER BY item_name ASC", (str(guild_id), shop_name)).fetchall()
         conn.close()
         return render_template_string(ITEMS_HTML, user=user, guild=guild, sidebar_guilds=sidebar, support_invite=support_invite, shop_name=shop_name, items=items)
 
@@ -129,7 +135,8 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         price = int(request.form.get("price", 0))
         if item_name:
             conn = get_connection()
-            conn.execute("""INSERT INTO shop_items (guild_id, shop_name, item_name, stock, price) VALUES (?, ?, ?, ?, ?) ON CONFLICT(guild_id, shop_name, item_name) DO UPDATE SET stock = excluded.stock, price = excluded.price""", (str(guild_id), shop_name, item_name, stock, price))
+            cur = conn.cursor()
+            cur.execute("""INSERT INTO shop_items (guild_id, shop_name, item_name, stock, price) VALUES (%s, %s, %s, %s, %s) ON CONFLICT(guild_id, shop_name, item_name) DO UPDATE SET stock = excluded.stock, price = excluded.price""", (str(guild_id), shop_name, item_name, stock, price))
             conn.commit()
             conn.close()
         return redirect(url_for("dashboard_boutique_items", guild_id=guild_id, shop_name=shop_name))
@@ -142,7 +149,8 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         stock = int(request.form.get("stock", 0))
         price = int(request.form.get("price", 0))
         conn = get_connection()
-        conn.execute("UPDATE shop_items SET item_name = ?, stock = ?, price = ? WHERE id = ? AND guild_id = ? AND shop_name = ?", (item_name, stock, price, item_id, str(guild_id), shop_name))
+        cur = conn.cursor()
+        cur.execute("UPDATE shop_items SET item_name = ?, stock = ?, price = ? WHERE id = %s AND guild_id = %s AND shop_name = %s", (item_name, stock, price, item_id, str(guild_id), shop_name))
         conn.commit()
         conn.close()
         return redirect(url_for("dashboard_boutique_items", guild_id=guild_id, shop_name=shop_name))
@@ -152,7 +160,8 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         if "access_token" not in session:
             return redirect(url_for("home"))
         conn = get_connection()
-        conn.execute("DELETE FROM shop_items WHERE id = ? AND guild_id = ? AND shop_name = ?", (item_id, str(guild_id), shop_name))
+        cur = conn.cursor()
+        cur.execute("DELETE FROM shop_items WHERE id = %s AND guild_id = %s AND shop_name = %s", (item_id, str(guild_id), shop_name))
         conn.commit()
         conn.close()
         return redirect(url_for("dashboard_boutique_items", guild_id=guild_id, shop_name=shop_name))
@@ -166,7 +175,8 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         if not guild:
             return "❌ Serveur introuvable ou accès refusé."
         conn = get_connection()
-        shops = conn.execute("SELECT * FROM darknet_shops WHERE guild_id = ? ORDER BY name ASC", (str(guild_id),)).fetchall()
+        shops = cur = conn.cursor()
+        shops = cur.execute("SELECT * FROM darknet_shops WHERE guild_id = %s ORDER BY name ASC", (str(guild_id),)).fetchall()
         conn.close()
         return render_template_string(DARKNET_HTML, user=user, guild=guild, sidebar_guilds=sidebar, support_invite=support_invite, shops=shops)
 
@@ -177,7 +187,9 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         name = request.form.get("name", "").strip()
         if name:
             conn = get_connection()
-            conn.execute("INSERT OR IGNORE INTO darknet_shops (guild_id, name) VALUES (?, ?)", (str(guild_id), name))
+            cur = conn.cursor()
+            cur.execute("INSERT INTO darknet_shops (guild_id, name) VALUES (%s, %s)
+            ON CONFLICT (guild_id, name) DO NOTHING", (str(guild_id), name))
             conn.commit()
             conn.close()
         return redirect(url_for("dashboard_darknet", guild_id=guild_id))
@@ -187,10 +199,13 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         if "access_token" not in session:
             return redirect(url_for("home"))
         conn = get_connection()
-        shop = conn.execute("SELECT * FROM darknet_shops WHERE id = ? AND guild_id = ?", (shop_id, str(guild_id))).fetchone()
+        shop = cur = conn.cursor()
+        shop = cur.execute("SELECT * FROM darknet_shops WHERE id = %s AND guild_id = ?", (shop_id, str(guild_id))).fetchone()
         if shop:
-            conn.execute("DELETE FROM darknet_items WHERE guild_id = ? AND shop_name = ?", (str(guild_id), shop["name"]))
-            conn.execute("DELETE FROM darknet_shops WHERE id = ? AND guild_id = ?", (shop_id, str(guild_id)))
+            cur = conn.cursor()
+            cur.execute("DELETE FROM darknet_items WHERE guild_id = %s AND shop_name = %s", (str(guild_id), shop["name"]))
+            cur = conn.cursor()
+            cur.execute("DELETE FROM darknet_shops WHERE id = %s AND guild_id = ?", (shop_id, str(guild_id)))
             conn.commit()
         conn.close()
         return redirect(url_for("dashboard_darknet", guild_id=guild_id))
@@ -204,7 +219,8 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         if not guild:
             return "❌ Serveur introuvable ou accès refusé."
         conn = get_connection()
-        items = conn.execute("SELECT * FROM darknet_items WHERE guild_id = ? AND shop_name = ? ORDER BY item_name ASC", (str(guild_id), shop_name)).fetchall()
+        items = cur = conn.cursor()
+        items = cur.execute("SELECT * FROM darknet_items WHERE guild_id = %s AND shop_name = %s ORDER BY item_name ASC", (str(guild_id), shop_name)).fetchall()
         conn.close()
         return render_template_string(DARKNET_ITEMS_HTML, user=user, guild=guild, sidebar_guilds=sidebar, support_invite=support_invite, shop_name=shop_name, items=items)
 
@@ -217,7 +233,8 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         price = int(request.form.get("price", 0))
         if item_name:
             conn = get_connection()
-            conn.execute("""INSERT INTO darknet_items (guild_id, shop_name, item_name, stock, price) VALUES (?, ?, ?, ?, ?) ON CONFLICT(guild_id, shop_name, item_name) DO UPDATE SET stock = excluded.stock, price = excluded.price""", (str(guild_id), shop_name, item_name, stock, price))
+            cur = conn.cursor()
+            cur.execute("""INSERT INTO darknet_items (guild_id, shop_name, item_name, stock, price) VALUES (%s, %s, %s, %s, %s) ON CONFLICT(guild_id, shop_name, item_name) DO UPDATE SET stock = excluded.stock, price = excluded.price""", (str(guild_id), shop_name, item_name, stock, price))
             conn.commit()
             conn.close()
         return redirect(url_for("dashboard_darknet_items", guild_id=guild_id, shop_name=shop_name))
@@ -230,7 +247,8 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         stock = int(request.form.get("stock", 0))
         price = int(request.form.get("price", 0))
         conn = get_connection()
-        conn.execute("UPDATE darknet_items SET item_name = ?, stock = ?, price = ? WHERE id = ? AND guild_id = ? AND shop_name = ?", (item_name, stock, price, item_id, str(guild_id), shop_name))
+        cur = conn.cursor()
+        cur.execute("UPDATE darknet_items SET item_name = ?, stock = ?, price = ? WHERE id = %s AND guild_id = %s AND shop_name = %s", (item_name, stock, price, item_id, str(guild_id), shop_name))
         conn.commit()
         conn.close()
         return redirect(url_for("dashboard_darknet_items", guild_id=guild_id, shop_name=shop_name))
@@ -240,7 +258,8 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         if "access_token" not in session:
             return redirect(url_for("home"))
         conn = get_connection()
-        conn.execute("DELETE FROM darknet_items WHERE id = ? AND guild_id = ? AND shop_name = ?", (item_id, str(guild_id), shop_name))
+        cur = conn.cursor()
+        cur.execute("DELETE FROM darknet_items WHERE id = %s AND guild_id = %s AND shop_name = %s", (item_id, str(guild_id), shop_name))
         conn.commit()
         conn.close()
-        return redirect(url_for("dashboard_darknet_items", guild_id=guild_id, shop_name=shop_name))
+        return redirect(url_for("dashboard_darknet_items", guild_id=guild_id, shop
