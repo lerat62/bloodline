@@ -90,7 +90,7 @@ def register_boutiques_darknet_routes(app, get_discord_user, get_admin_guilds_wi
         if name:
             conn = get_connection()
             cur = conn.cursor()
-            cur.execute("INSERT INTO shops (guild_id, name) VALUES (%s, %s)
+            cur.execute("INSERT INTO shops (guild_id, name) VALUES (%s, %s)",
             ON CONFLICT (guild_id, name) DO NOTHING", (str(guild_id), name))
             conn.commit()
             conn.close()
